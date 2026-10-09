@@ -114,6 +114,7 @@
   }
 
   const render = (f, v) => ST.render(f, { idx: v.idx });
+  ST.runPhases = runPhases; // наивный Укконен O(m³) — переиспользуется в билете 19
 
   App.register({
     id: 'stree', block: 4, num: 18, title: 'Суффиксные деревья',

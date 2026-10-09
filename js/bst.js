@@ -31,13 +31,13 @@
   App.parseOps = function (s, withPri) {
     const out = [];
     for (const tok of String(s).split(/[\s,;]+/).filter(Boolean)) {
-      const m = /^([+\-?]?)(\d{1,3})(?::(\d{1,3}))?$/.exec(tok);
+      const m = /^([+\-?^]?)(\d{1,3})(?::(\d{1,3}))?$/.exec(tok);
       if (!m) return { err: `Не понял «${tok}». Пиши числа 0–999: «7» или «+7» — вставка, «-7» — удаление, «?7» — поиск${withPri ? ', «7:40» — ключ с приоритетом' : ''}.` };
       out.push({ t: m[1] || '+', k: +m[2], p: m[3] != null ? +m[3] : null });
     }
     return { ops: out };
   };
-  App.opName = (o) => ({ '+': 'вставка', '-': 'удаление', '?': 'поиск' })[o.t] + ' ' + o.k;
+  App.opName = (o) => ({ '+': 'вставка', '-': 'удаление', '?': 'поиск', '^': 'поворот' })[o.t] + ' ' + o.k;
 
   /* ---------- отрисовка бинарного дерева ----------
      S = {N, root}; o: {forest:[{root,label}], badge(id)→текст, cls(id)→класс состояния, color(id)→'red'|'black', nil:{parent, side, label}} */
@@ -84,7 +84,8 @@
       const x = X(id), y = Y(id), st = o.cls ? o.cls(+id) || '' : '', col = o.color ? o.color(+id) : '';
       if (o.label) {
         const hw = hwOf(id);
-        nodes += `<g class="bt-n pill ${col} ${st}">${st ? `<rect class="ring" x="${x - hw - 4}" y="${y - R - 4}" width="${2 * hw + 8}" height="${2 * R + 8}" rx="${R + 4}"/>` : ''}<rect x="${x - hw}" y="${y - R}" width="${2 * hw}" height="${2 * R}" rx="${R}"/><text x="${x}" y="${y + 4.5}">${esc(txt(id))}</text></g>`;
+        const bd = o.badge ? o.badge(+id) : null;
+        nodes += `<g class="bt-n pill ${col} ${st}">${st ? `<rect class="ring" x="${x - hw - 4}" y="${y - R - 4}" width="${2 * hw + 8}" height="${2 * R + 8}" rx="${R + 4}"/>` : ''}<rect x="${x - hw}" y="${y - R}" width="${2 * hw}" height="${2 * R}" rx="${R}"/><text x="${x}" y="${y + 4.5}">${esc(txt(id))}</text>${bd != null && bd !== '' ? `<text class="bt-b" x="${x - hw + 2}" y="${y - R - 5}">${esc(bd)}</text>` : ''}</g>`;
         continue;
       }
       nodes += `<g class="bt-n ${col} ${st}">${st ? `<circle class="ring" cx="${x}" cy="${y}" r="${R + 4}"/>` : ''}<circle cx="${x}" cy="${y}" r="${R}"/><text x="${x}" y="${y + 4.5}">${esc(N[id].key)}</text>`;
@@ -101,7 +102,34 @@
       if (hd.label) top += `<text class="bt-h" x="${padX + hd.x}" y="20">${esc(hd.label)}</text>`;
       if (hd.empty) top += `<text class="bt-h dim" x="${padX + hd.x}" y="${padT + 5}">∅</text>`;
     }
-    return `<div class="tree-wrap"><svg class="bt" width="${Math.max(Wd, 120)}" height="${Ht}" viewBox="0 0 ${Math.max(Wd, 120)} ${Ht}" role="img" aria-label="дерево">${top}${edges}${nodes}</svg></div>`;
+    // подписи рёбер (например «≤» / «>» в дереве решений)
+    let elabs = '';
+    if (o.edgeLabel) for (const id in pos) for (const [c, sd] of [[N[id].l, -1], [N[id].r, 1]]) if (c != null && pos[c]) {
+      const t = o.edgeLabel(+c);
+      if (t) elabs += `<text class="bt-el" x="${(X(id) + X(c)) / 2 + sd * 10}" y="${(Y(id) + Y(c)) / 2 - 2}">${esc(t)}</text>`;
+    }
+    // обратные ссылки (PATRICIA): {from, to, side:'l'|'r', cls}
+    let back = '', defs = '';
+    if (o.links && o.links.length) {
+      const mid = 'bk' + ++uid;
+      defs = `<defs><marker id="${mid}" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0L10 5L0 10z" class="tv-ah"/></marker></defs>`;
+      for (const L of o.links) {
+        if (!pos[L.from] || !pos[L.to]) continue;
+        const hwA = hwOf(L.from), hwB = hwOf(L.to), s = L.side === 'l' ? -1 : 1;
+        const ax = X(L.from) + s * hwA, ay = Y(L.from) + 3;
+        let d;
+        if (L.from === L.to) d = `M${ax} ${ay - 6}C${ax + s * 34} ${ay - 30} ${ax + s * 34} ${ay + 28} ${ax + s * 2} ${ay + 9}`;
+        else {
+          const bx = X(L.to) + s * hwB, by = Y(L.to) + (Y(L.to) < ay ? 6 : -6);
+          const ccx = s > 0 ? Math.max(ax, bx) + 36 + Math.abs(ay - by) * 0.25 : Math.min(ax, bx) - 36 - Math.abs(ay - by) * 0.25;
+          d = `M${ax} ${ay}Q${ccx.toFixed(1)} ${((ay + by) / 2).toFixed(1)} ${bx} ${by}`;
+        }
+        back += `<path class="tv-k ${L.cls || ''}" d="${d}" marker-end="url(#${mid})"/>`;
+      }
+    }
+    const extra = o.links && o.links.length ? 90 : 0;
+    const Wt = Math.max(Wd, 120) + extra, sh = extra / 2;
+    return `<div class="tree-wrap"><svg class="bt" width="${Wt}" height="${Ht}" viewBox="${-sh} 0 ${Wt} ${Ht}" role="img" aria-label="дерево">${defs}${top}${edges}${back}${elabs}${nodes}</svg></div>`;
   };
 
   /* ---------- отрисовка B-дерева ----------

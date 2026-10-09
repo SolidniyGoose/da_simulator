@@ -185,7 +185,7 @@
         { id: 'ops', label: 'Операции', raw: true, value: '10 20 30 40 50 60 70 80 90 25 35 -60 -70 -20', max: 120, w: 30 },
         { id: 't', label: 't', type: 'select', value: '2', options: [['2', 't = 2 (1…3 ключа)'], ['3', 't = 3 (2…5 ключей)']] },
       ],
-      validate: (v) => { const r = App.parseOps(v.ops); return r.err || (r.ops.filter((o) => o.t === '+').length > 30 ? 'Не больше 30 вставок.' : null); },
+      validate: (v) => { const r = App.parseOps(v.ops); return r.err || (r.ops.some((o) => o.t === '^') ? 'Поворот «^» — операция билета 5.' : null) || (r.ops.filter((o) => o.t === '+').length > 30 ? 'Не больше 30 вставок.' : null); },
       presets: [
         { label: 'рост вверх', v: { ops: '10 20 30 40 50 60 70 80 90', t: '2' } },
         { label: 'все случаи удаления', v: { ops: '10 70 20 40 60 80 50 90 100 30 -70 -80 -10', t: '2' } },

@@ -196,7 +196,7 @@
   const render = (f) =>
     (f.ops ? App.opsChips(f.ops.map((o) => ({ ...o })), f.opi) : '') +
     App.btree(f.S, { forest: f.forest, label: (id) => `⟨${f.S.N[id].key}, ${f.S.N[id].pri}⟩`, cls: (id) => (f.mark || {})[id] });
-  const vOps = (v) => { const r = App.parseOps(v.ops, true); return r.err || (r.ops.filter((o) => o.t === '+').length > 16 ? 'Не больше 16 вставок.' : null); };
+  const vOps = (v) => { const r = App.parseOps(v.ops, true); return r.err || (r.ops.some((o) => o.t === '^') ? 'Поворот «^» — операция билета 5.' : null) || (r.ops.filter((o) => o.t === '+').length > 16 ? 'Не больше 16 вставок.' : null); };
 
   App.register({
     id: 'treap', block: 2, num: 8, title: 'Декартовы деревья',
@@ -311,6 +311,7 @@
 
 <h3>Высота</h3>
 <div class="thm"><b>Теорема.</b> Если приоритеты независимы и равномерно распределены, математическое ожидание высоты O(log n), поэтому все операции работают в среднем за O(log n).</div>
-<div class="proof"><p>Пусть ключи отсортированы: x₁ &lt; … &lt; x<sub>n</sub>. Вершина x<sub>i</sub> — предок x<sub>j</sub> тогда и только тогда, когда у x<sub>i</sub> наибольший приоритет среди x<sub>min(i,j)</sub>, …, x<sub>max(i,j)</sub> (иначе их разделит вершина с бо́льшим приоритетом между ними). Вероятность этого 1/(|i − j| + 1). Значит, ожидаемая глубина x<sub>j</sub> = Σ<sub>i≠j</sub> 1/(|i − j| + 1) ≤ 2·H<sub>n</sub> ≈ 2 ln n = O(log n). Это та же оценка, что для случайного дерева поиска: декартово дерево — дерево поиска, в которое ключи вставлены в порядке убывания приоритетов.</p></div>`,
+<div class="proof"><p>Пусть ключи отсортированы: x₁ &lt; … &lt; x<sub>n</sub>. Вершина x<sub>i</sub> — предок x<sub>j</sub> тогда и только тогда, когда у x<sub>i</sub> наибольший приоритет среди x<sub>min(i,j)</sub>, …, x<sub>max(i,j)</sub> (иначе их разделит вершина с бо́льшим приоритетом между ними). Вероятность этого 1/(|i − j| + 1). Значит, ожидаемая глубина x<sub>j</sub> = Σ<sub>i≠j</sub> 1/(|i − j| + 1) ≤ 2·H<sub>n</sub> ≈ 2 ln n = O(log n). Это та же оценка, что для случайного дерева поиска: декартово дерево — дерево поиска, в которое ключи вставлены в порядке убывания приоритетов.</p></div>
+<p class="note">Где почитать (источники лектора): Seidel R., Aragon C. «Randomized Search Trees»; Mehta D., Sahni S. «Handbook of Data Structures and Applications», гл. 28; конспекты ИТМО (neerc.ifmo.ru/wiki). Продолжение темы — «Неявные декартовы деревья» (8+ в оглавлении).</p>`,
   });
 })(window.App);

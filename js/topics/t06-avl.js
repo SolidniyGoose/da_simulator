@@ -115,7 +115,7 @@
       id: 'main', label: 'Операции',
       note: 'Операции через пробел: «7» — вставка, «-7» — удаление, «?7» — поиск. Бейдж у вершины — diff = h(левого) − h(правого).',
       inputs: [{ id: 'ops', label: 'Операции', raw: true, value: '50 20 70 10 30 25 -70 ?25', max: 80, w: 26 }],
-      validate: (v) => { const r = App.parseOps(v.ops); return r.err || (r.ops.filter((o) => o.t === '+').length > 20 ? 'Не больше 20 вставок — иначе дерево не поместится.' : null); },
+      validate: (v) => { const r = App.parseOps(v.ops); return r.err || (r.ops.some((o) => o.t === '^') ? 'Поворот «^» — операция билета 5.' : null) || (r.ops.filter((o) => o.t === '+').length > 20 ? 'Не больше 20 вставок — иначе дерево не поместится.' : null); },
       presets: [
         { label: 'малый поворот', v: { ops: '10 20 30' } },
         { label: 'большой поворот', v: { ops: '30 10 20' } },

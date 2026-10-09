@@ -49,7 +49,7 @@
       for (const [num, , full] of TICKETS.filter((x) => x[1] === b.id)) if (!byNum(num)) items.push([num, full, null]);
       items.sort((a, b2) => a[0] - b2[0]);
       for (const [num, title, t] of items) {
-        if (t) h += `<li><a class="tk" href="#${t.id}" data-id="${t.id}"><span class="n">${num}</span><span>${esc(t.title)}</span>${d[t.id] ? '<span class="ck" title="разобрано">✓</span>' : '<span></span>'}</a></li>`;
+        if (t) h += `<li><a class="tk" href="#${t.id}" data-id="${t.id}"><span class="n">${esc(t.label || num)}</span><span>${esc(t.title)}</span>${d[t.id] ? '<span class="ck" title="разобрано">✓</span>' : '<span></span>'}</a></li>`;
         else {
           const tk = TICKETS.find((x) => x[0] === num);
           h += `<li><a class="tk off" href="#soon-${num}"><span class="n">${num}</span><span>${esc(tk ? tk[2] : title)}</span><span class="st">скоро</span></a></li>`;
@@ -202,7 +202,7 @@
     const main = $('#main');
     main.innerHTML = `
       <header class="th">
-        <div class="eyebrow">Блок ${blk.roman} · ${esc(blk.title)} · билет ${t.num}</div>
+        <div class="eyebrow">Блок ${blk.roman} · ${esc(blk.title)} · ${t.label ? `дополнение к билету ${Math.floor(t.num)}` : `билет ${t.num}`}</div>
         <div class="th-row"><h1>${esc(t.title)}</h1>
           <label class="done-t"><input type="checkbox" id="doneT"${done()[t.id] ? ' checked' : ''}> разобрано</label></div>
         <p class="q">${esc(t.full)}</p>
@@ -400,7 +400,7 @@
     $('#main').innerHTML = `<header class="th"><div class="eyebrow">Блок ${blk.roman} · ${esc(blk.title)} · билет ${num}</div>
       <h1>${esc(tk ? tk[2] : 'Билет ' + num)}</h1><p class="q">${esc(tk ? tk[3] : '')}</p></header>
       <div class="soon"><h2>Этот билет ещё не готов</h2>
-      <p>Сейчас в симуляторе блоки III (поиск образца) и IV (суффиксные деревья) — они в приоритете. Блоки II и I добавим следующими: деревья поиска, AVL, красно-чёрные, декартовы, B-деревья, trie и PATRICIA, затем линейные сортировки.</p></div>`;
+      <p>Этого билета пока нет в симуляторе. Выбери другой в оглавлении.</p></div>`;
   }
 
   /* ---------- клавиатура и маршрут ---------- */

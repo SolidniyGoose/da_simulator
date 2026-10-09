@@ -347,6 +347,10 @@ code, .mono { font-family: var(--f-mono); }
 .bt-n.done > circle:not(.ring) { fill: var(--ok-bg); stroke: var(--ok); }
 .bt-b { font: 600 10.5px var(--f-mono); fill: var(--muted); text-anchor: start; paint-order: stroke; stroke: var(--panel); stroke-width: 3px; }
 .bt-n.red .bt-b, .bt-n.black .bt-b { fill: var(--muted); }
+.bkt-dot { fill: var(--accent); }
+.bkt-dot.on { fill: var(--bad); }
+.bt-el { font: 600 11px var(--f-mono); fill: var(--muted); text-anchor: middle; paint-order: stroke; stroke: var(--panel); stroke-width: 3px; }
+.bt-n.leafp > rect:not(.ring) { fill: var(--panel-2); stroke-dasharray: 3 2; }
 .bt-h { font: 600 12px var(--f-body); fill: var(--muted); text-anchor: middle; }
 .bt-h.dim { font-size: 16px; }
 .bt-nil rect { fill: var(--rbb); stroke: var(--warn); stroke-width: 2; }

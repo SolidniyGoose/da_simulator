@@ -149,7 +149,7 @@
       id: 'main', label: 'Операции',
       note: 'Обозначения как в конспекте: X — текущая вершина, P — отец, GP — дед, U — дядя, B — брат, S₁ и S₂ — сыновья брата (ближний и дальний).',
       inputs: [{ id: 'ops', label: 'Операции', raw: true, value: '10 20 30 15 25 5 1 -30 -20', max: 80, w: 26 }],
-      validate: (v) => { const r = App.parseOps(v.ops); return r.err || (r.ops.filter((o) => o.t === '+').length > 20 ? 'Не больше 20 вставок.' : null); },
+      validate: (v) => { const r = App.parseOps(v.ops); return r.err || (r.ops.some((o) => o.t === '^') ? 'Поворот «^» — операция билета 5.' : null) || (r.ops.filter((o) => o.t === '+').length > 20 ? 'Не больше 20 вставок.' : null); },
       presets: [
         { label: 'дядя красный', v: { ops: '10 5 15 1' } },
         { label: 'не в одном направлении', v: { ops: '10 5 7' } },
