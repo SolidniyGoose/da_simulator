@@ -66,7 +66,7 @@
       x0 += w * W + (trees.length > 1 ? 34 : 0);
     }
     const lab = trees.some((t) => t.label);
-    const padX = 28, padT = lab ? 52 : 28;
+    const padX = Math.max(28, maxHW + 10), padT = lab ? 52 : 28;
     const X = (id) => padX + pos[id][0];
     const Y = (id) => padT + pos[id][1] * H;
     const Wd = padX * 2 + x0 - (trees.length > 1 ? 34 : 0) - W + 30, Ht = padT + maxD * H + R + (o.nil ? 56 : 30);

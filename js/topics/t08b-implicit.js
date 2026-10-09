@@ -21,8 +21,14 @@
   function run({ arr, ops: src }) {
     const vals = arr.split(/[\s,;]+/).filter(Boolean).map(Number), { ops } = parseOps(src);
     const T = new App.BT(), F = [];
-    let seed = 7;
-    const rnd = () => { seed = (seed * 1103515245 + 12345) & 0x7fffffff; return 1 + (seed % 99); };
+    // псевдослучайные приоритеты 1…99 (mulberry32 с фиксированным зерном — пример воспроизводим)
+    let seed = 20261009;
+    const rnd = () => {
+      seed = (seed + 0x6d2b79f5) | 0;
+      let t = Math.imul(seed ^ (seed >>> 15), 1 | seed);
+      t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t;
+      return 1 + (((t ^ (t >>> 14)) >>> 0) % 99);
+    };
     const N = T.N;
     const cnt = (t) => (t == null ? 0 : N[t].cnt);
     const sum = (t) => (t == null ? 0 : N[t].sum);
@@ -116,7 +122,7 @@
       T.root = res;
       updAll(T.root);
     }
-    push([], `Неявное декартово дерево массива [${vals.join(', ')}]: симметричный обход даёт массив по порядку, а «ключ» вершины — её индекс — нигде не хранится. Храним размер поддерева cnt (бейдж «c»), сумму и флаг разворота. Бейдж «p» — приоритет.`, { big: true });
+    push([], `Неявное декартово дерево массива [${vals.join(', ')}]: симметричный обход даёт массив по порядку, а «ключ» вершины — её индекс — нигде не хранится. Вершина показана как ⟨значение, приоритет⟩; храним ещё размер поддерева cnt (бейдж «c»), сумму и флаг разворота.`, { big: true });
 
     for (opi = 0; opi < ops.length; opi++) {
       const o = ops[opi], n = cnt(T.root);
@@ -180,8 +186,8 @@
     if (f.arr) h += App.strip(Math.max(f.arr.length, 1), [{ type: 'idx', n: f.arr.length }, { type: 'chars', label: 'массив', chars: f.arr.map(String) }]);
     h += App.btree(f.S, {
       forest: f.forest,
-      label: (id) => String(f.S.N[id].key) + (f.S.N[id].rev ? ' ↔' : ''),
-      badge: (id) => `p${f.S.N[id].pri} c${f.S.N[id].cnt}`,
+      label: (id) => `⟨${f.S.N[id].key}, ${f.S.N[id].pri}⟩` + (f.S.N[id].rev ? ' ↔' : ''),
+      badge: (id) => `c=${f.S.N[id].cnt}`,
       cls: (id) => (f.mark || {})[id],
     });
     return h;
@@ -192,7 +198,7 @@
     full: 'Дополнение к билету 8. Декартово дерево по неявному ключу: операции над массивом по индексам.',
     modes: [{
       id: 'main', label: 'Операции над массивом',
-      note: 'Команды через «;»: ins i x — вставить x на позицию i, del i — удалить позицию i, get i — элемент, rev l r — развернуть отрезок, sum l r — сумма отрезка. Индексы с 0. Бейджи: p — приоритет, c — размер поддерева; ↔ — флаг разворота.',
+      note: 'Команды через «;»: ins i x — вставить x на позицию i, del i — удалить позицию i, get i — элемент, rev l r — развернуть отрезок, sum l r — сумма отрезка. Индексы с 0. Вершина — ⟨значение, приоритет⟩, бейдж c — размер поддерева, ↔ — флаг разворота.',
       inputs: [
         { id: 'arr', label: 'Исходный массив', raw: true, value: '5 1 4 2 8 3', max: 60, w: 16 },
         { id: 'ops', label: 'Команды', raw: true, value: 'rev 1 4; get 2; ins 0 7; sum 1 3; del 3', max: 120, w: 28 },
